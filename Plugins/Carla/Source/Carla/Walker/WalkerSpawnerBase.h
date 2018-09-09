@@ -99,7 +99,7 @@ private:
 
   /** If false, no walker will be spawned at all. */
   UPROPERTY(Category = "Walker Spawner", EditAnywhere)
-  bool bSpawnWalkers = true;
+  bool bSpawnWalkers = false;
 
   /** If false, no walker will be spawned at begin play. */
   UPROPERTY(Category = "Walker Spawner", EditAnywhere, meta = (EditCondition = bSpawnWalkers))

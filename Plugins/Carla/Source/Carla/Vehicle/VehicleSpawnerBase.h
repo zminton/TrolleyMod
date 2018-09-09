@@ -76,11 +76,11 @@ protected:
   UPROPERTY()
   URoadMap *RoadMap = nullptr;
 
-  /** If false, no walker will be spawned. */
+  /** If false, no vehicle will be spawned. */
   UPROPERTY(Category = "Vehicle Spawner", EditAnywhere)
-  bool bSpawnVehicles = true;
+  bool bSpawnVehicles = false;
 
-  /** Number of walkers to be present within the volume. */
+  /** Number of vehicles to be present within the volume. */
   UPROPERTY(Category = "Vehicle Spawner", EditAnywhere, meta = (EditCondition = bSpawnVehicles, ClampMin = "1"))
   int32 NumberOfVehicles = 10;
 
