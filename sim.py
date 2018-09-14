@@ -14,7 +14,6 @@ import argparse
 import logging
 import random
 import time
-import threading, queue
 from pynput.keyboard import Key, Listener, KeyCode
 from carla.client import make_carla_client, VehicleControl
 from carla.sensor import Camera, Lidar
@@ -22,17 +21,14 @@ from carla.settings import CarlaSettings
 from carla.tcp import TCPConnectionError
 from carla.util import print_over_same_line
 
-steerval = 0.0
+#Variable to track the car's steering value for sending to the client.
+steerval = 0.0 
 
 #Class for a simple keyboard listener that inputs left and right turns.
-class InputHandler(threading.Thread):
+class InputHandler():
     def __init__(self):
-        super(InputHandler, self).__init__()
         self.listener = Listener(on_press=self.on_press, on_release=self.on_release)
         self.listener.start()
-    
-    def run(self):
-        self.listener.join()
     
     def on_press(self, key):
         try:
@@ -56,7 +52,7 @@ class InputHandler(threading.Thread):
             pass
          
        
-def run_carla_client(args):
+def run_carla_client(args, handler):
     # Here we will run 1 episode of 1000 frames.
     number_of_episodes = 1
     frames_per_episode = 1000
@@ -68,7 +64,11 @@ def run_carla_client(args):
     # context manager makes sure the connection is always cleaned up on exit.
     with make_carla_client(args.host, args.port) as client:
         print('CarlaClient connected')
-
+        
+        #Creating a new InputHandler if its old Listener is terminated.
+        if not handler.listener.is_alive():
+            handler = InputHandler()
+      
         for episode in range(0, number_of_episodes):
             # Start a new episode.
 
@@ -187,6 +187,7 @@ def run_carla_client(args):
                     control = measurements.player_measurements.autopilot_control
                     control.steer += random.uniform(-0.1, 0.1)
                     client.send_control(control)
+                                        
 
 def print_measurements(measurements):
     number_of_agents = len(measurements.non_player_agents)
@@ -262,14 +263,13 @@ def main():
 
     args.out_filename_format = '_out/episode_{:0>4d}/{:s}/{:0>6d}'
 
-    q = queue.Queue()
     handler = InputHandler()
 
     while True:
         try:
 
-            run_carla_client(args)
-
+            run_carla_client(args, handler)
+              
             print('Done.')
             return
 
